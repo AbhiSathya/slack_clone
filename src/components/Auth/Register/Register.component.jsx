@@ -1,42 +1,46 @@
-import React, { useState } from "react";
-import "./Register.css"
+import { useState } from "react";
+import "./Register.css";
 import {
-  FormInput,
+  TextField,
   Grid,
-  GridColumn,
-  Segment,
-  Header,
-  Icon,
+  Paper,
+  Typography,
+  IconButton,
   Button,
-  Message,
-} from "semantic-ui-react";
+  Alert,
+} from "@mui/material";
+import { AccountCircle, MailOutline, Lock } from "@mui/icons-material";
+import { auth, db } from "../../../server/firebase.js";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { collection, addDoc } from "firebase/firestore";
 
-const Register = () => {
-  let InitialUser = {
+export default function Register() {
+  const InitialUser = {
     userName: "",
     email: "",
     password: "",
     confirmPassword: "",
   };
-  let errors = [];
   const [userState, setUserState] = useState(InitialUser);
-  const [errorState, setErrorState] = useState(errors);
+  const [errorState, setErrorState] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  // const [isSuccess, setIsSuccess] = useState(false);
 
   const handleInput = (event) => {
-    let target = event.target;
-    setUserState((currentState) => {
-      let currentUser = { ...currentState };
-      currentUser[target.name] = target.value;
-      return currentUser;
-    });
+    const target = event.target;
+    setUserState((currentState) => ({
+      ...currentState,
+      [target.name]: target.value,
+    }));
   };
 
   const checkForm = () => {
     if (isFormEmpty()) {
-      setErrorState((error) => error.concat({message : "Please fill in all the fields"}));
+      setErrorState((error) =>
+        error.concat({ message: "Please fill in all the fields" })
+      );
       return false;
     } else if (!checkPassword()) {
-      // setErrorState((error) => error.concat({message : "not matching"}));
       return false;
     }
     return true;
@@ -53,25 +57,74 @@ const Register = () => {
 
   const checkPassword = () => {
     if (userState.password.length < 8) {
-        setErrorState((error) => error.concat({ message: "Password length should be more than 8" }));
-        return false;
-    }
-    else if (userState.password !== userState.confirmPassword) {
-        setErrorState((error) => error.concat({ message: "Password and Confirm Password does not match" }));
-        return false;
+      setErrorState((error) =>
+        error.concat({ message: "Password length should be more than 8" })
+      );
+      return false;
+    } else if (userState.password !== userState.confirmPassword) {
+      setErrorState((error) =>
+        error.concat({ message: "Password and Confirm Password do not match" })
+      );
+      return false;
     }
     return true;
-}
+  };
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
     setErrorState(() => []);
-    if(checkForm()) {
-      //
+    if (checkForm()) {
+      await createUserWithEmailAndPassword(
+        auth,
+        userState.email,
+        userState.password
+      )
+        .then((createdUser) => {
+          console.log(createdUser);
+          updateUserDetails(createdUser);
+        })
+        .catch((serverError) => {
+          setErrorState((e) => e.concat(serverError));
+        });
     }
-    else {
-      //
+  };
+
+  const updateUserDetails = async (createdUser) => {
+    if (createdUser) {
+      await updateProfile(createdUser.user, {
+        displayName: userState.userName,
+        photoURL: `http://gravatar.com/avatar/${createdUser.user.uid}?d=identicon`,
+      })
+        .then(() => {
+          // console.log("after updating  : ", createdUser);
+          saveUserInDb(createdUser);
+          // console.log("Checking");
+        })
+        .catch((serverError) => {
+          setErrorState((e) => e.concat(serverError));
+        });
     }
+  };
+
+  const saveUserInDb = async (createdUser) => {
+    console.log(
+      createdUser.user.displayName,
+      createdUser.user.email,
+      createdUser.user.photoURL
+    );
+    const obj = {
+      displayName: createdUser.user.displayName,
+      photoURL: createdUser.user.photoURL,
+    };
+    console.log(obj);
+    await addDoc(collection(db, "users"), obj)  // TODO fix this bug when user is added  to collection
+      .then(() => {
+        console.log("Successfully added");
+      })
+      .catch((serverError) => {
+        setErrorState((e) => e.concat(serverError));
+        console.log("Error");
+      });
   };
 
   const formatErrors = () => {
@@ -79,70 +132,107 @@ const Register = () => {
   };
 
   return (
-    <Grid verticalAlign="middle" textAlign="center" className="grid-form">
-      <GridColumn style={{ maxWidth: "500px" }}>
-        <Header as="h2" icon>
-          <Icon name="slack" />
-          Register
-        </Header>
-        <form onSubmit={onSubmit}>
-          <Segment stacked>
-            <FormInput
+    <Grid
+      container
+      justifyContent="center"
+      alignItems="center"
+      className="grid-form"
+    >
+      <Grid item xs={12} sm={8} md={6}>
+        <Paper elevation={3} style={{ padding: "20px" }}>
+          <Typography variant="h4" align="center" gutterBottom>
+            <IconButton>
+              <AccountCircle fontSize="large" />
+            </IconButton>
+            Register
+          </Typography>
+          <form onSubmit={onSubmit}>
+            <TextField
               name="userName"
-              value={userState.name}
-              icon="user"
-              iconPosition="left"
+              value={userState.userName}
               onChange={handleInput}
-              type="text"
-              placeholder="User Name"
-              style={{ width: "100%" }}
-              size="large"
+              label="User Name"
+              fullWidth
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <IconButton position="start">
+                    <AccountCircle />
+                  </IconButton>
+                ),
+              }}
+              autoComplete="username"
             />
-            <FormInput
+            <TextField
               name="email"
               value={userState.email}
-              icon="mail"
-              iconPosition="left"
               onChange={handleInput}
-              type="text"
-              placeholder="User Email"
-              style={{ width: "100%" }}
-              size="large"
+              label="User Email"
+              type="email"
+              fullWidth
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <IconButton position="start">
+                    <MailOutline />
+                  </IconButton>
+                ),
+              }}
+              autoComplete="email"
             />
-            <FormInput
+            <TextField
               name="password"
               value={userState.password}
-              icon="lock"
-              iconPosition="left"
               onChange={handleInput}
+              label="User Password"
               type="password"
-              placeholder="User Password"
-              style={{ width: "100%" }}
-              size="large"
+              fullWidth
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <IconButton position="start">
+                    <Lock />
+                  </IconButton>
+                ),
+              }}
+              autoComplete="new-password"
             />
-            <FormInput
+            <TextField
               name="confirmPassword"
               value={userState.confirmPassword}
-              icon="lock"
-              iconPosition="left"
               onChange={handleInput}
+              label="Confirm Password"
               type="password"
-              placeholder="Confirm Password"
-              style={{ width: "100%" }}
-              size="large"
+              fullWidth
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <IconButton position="start">
+                    <Lock />
+                  </IconButton>
+                ),
+              }}
+              autoComplete="new-password"
             />
-          </Segment>
-          <Button onClick={onSubmit}>Submit</Button>
-        </form>
-        {errorState.length > 0 && (
-          <Message error>
-            <h3>Errors</h3>
-            {formatErrors()}
-          </Message>
-        )}
-      </GridColumn>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              style={{ marginTop: "20px" }}
+              disabled={isLoading}
+            >
+              {isLoading ? "Loading..." : "Submit"}
+            </Button>
+          </form>
+          {errorState.length > 0 && (
+            <Alert severity="error" style={{ marginTop: "20px" }}>
+              <Typography variant="h6">Errors</Typography>
+              {formatErrors()}
+            </Alert>
+          )}
+        </Paper>
+      </Grid>
     </Grid>
   );
 }
-
-export default Register;
