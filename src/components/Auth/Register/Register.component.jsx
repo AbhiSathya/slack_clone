@@ -10,9 +10,10 @@ import {
   Alert,
 } from "@mui/material";
 import { AccountCircle, MailOutline, Lock } from "@mui/icons-material";
-import { auth, db } from "../../../server/firebase.js";
+import { auth, realTimeDb } from "../../../server/firebase.js";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
+import { ref, set } from "firebase/database";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const InitialUser = {
@@ -24,7 +25,8 @@ export default function Register() {
   const [userState, setUserState] = useState(InitialUser);
   const [errorState, setErrorState] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  // const [isSuccess, setIsSuccess] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   const handleInput = (event) => {
     const target = event.target;
@@ -73,58 +75,47 @@ export default function Register() {
   const onSubmit = async (event) => {
     event.preventDefault();
     setErrorState(() => []);
+    setIsSuccess(false);
     if (checkForm()) {
-      await createUserWithEmailAndPassword(
-        auth,
-        userState.email,
-        userState.password
-      )
-        .then((createdUser) => {
-          console.log(createdUser);
-          updateUserDetails(createdUser);
-        })
-        .catch((serverError) => {
-          setErrorState((e) => e.concat(serverError));
+      setIsLoading(true);
+      try {
+        const { user } = await createUserWithEmailAndPassword(
+          auth,
+          userState.email,
+          userState.password
+        );
+        console.log(`User ${user.uid} created`);
+        await updateProfile(user, {
+          displayName: userState.userName,
+          photoURL: `http://gravatar.com/avatar/${user.uid}?d=identicon`,
         });
-    }
-  };
-
-  const updateUserDetails = async (createdUser) => {
-    if (createdUser) {
-      await updateProfile(createdUser.user, {
-        displayName: userState.userName,
-        photoURL: `http://gravatar.com/avatar/${createdUser.user.uid}?d=identicon`,
-      })
-        .then(() => {
-          // console.log("after updating  : ", createdUser);
-          saveUserInDb(createdUser);
-          // console.log("Checking");
-        })
-        .catch((serverError) => {
-          setErrorState((e) => e.concat(serverError));
-        });
-    }
-  };
-
-  const saveUserInDb = async (createdUser) => {
-    console.log(
-      createdUser.user.displayName,
-      createdUser.user.email,
-      createdUser.user.photoURL
-    );
-    const obj = {
-      displayName: createdUser.user.displayName,
-      photoURL: createdUser.user.photoURL,
-    };
-    console.log(obj);
-    await addDoc(collection(db, "users"), obj)  // TODO fix this bug when user is added  to collection
-      .then(() => {
-        console.log("Successfully added");
-      })
-      .catch((serverError) => {
+        await saveUserInDb(user);
+        setIsLoading(false);
+        setIsSuccess(true);
+        setTimeout(() => {
+          navigate("/login"); // Redirect to login page after 2 seconds
+        }, 2000);
+      } catch (serverError) {
+        setIsLoading(false);
         setErrorState((e) => e.concat(serverError));
-        console.log("Error");
-      });
+      }
+    }
+  };
+
+  const saveUserInDb = async (user) => {
+    const userRef = ref(realTimeDb, `users/${user.uid}`);
+    const userData = {
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+    };
+
+    try {
+      await set(userRef, userData);
+      setIsSuccess(true);
+    } catch (error) {
+      setErrorState((e) => e.concat(error));
+      console.error("Error saving user data:", error);
+    }
   };
 
   const formatErrors = () => {
@@ -138,7 +129,7 @@ export default function Register() {
       alignItems="center"
       className="grid-form"
     >
-      <Grid item xs={12} sm={8} md={6}>
+      <Grid item xs={12} sm={8} md={5}>
         <Paper elevation={3} style={{ padding: "20px" }}>
           <Typography variant="h4" align="center" gutterBottom>
             <IconButton>
@@ -231,6 +222,23 @@ export default function Register() {
               {formatErrors()}
             </Alert>
           )}
+          {isSuccess && (
+            <Alert
+              severity="success"
+              style={{
+                marginTop: "20px",
+                textAlign: "center",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="h6">Successfully Registered!</Typography>
+            </Alert>
+          )}
+          <Typography style={{ marginTop: "20px", textAlign: "center" }}>
+            Already a user? <Link to="/login">Login</Link>
+          </Typography>
         </Paper>
       </Grid>
     </Grid>
