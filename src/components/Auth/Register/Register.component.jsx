@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./Register.css";
+import "../Auth.css";
 import {
   TextField,
   Grid,
@@ -10,6 +10,7 @@ import {
   Alert,
 } from "@mui/material";
 import { AccountCircle, MailOutline, Lock } from "@mui/icons-material";
+import HowToRegSharpIcon from '@mui/icons-material/HowToRegSharp';
 import { auth, realTimeDb } from "../../../server/firebase.js";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, set } from "firebase/database";
@@ -133,7 +134,7 @@ export default function Register() {
         <Paper elevation={3} style={{ padding: "20px" }}>
           <Typography variant="h4" align="center" gutterBottom>
             <IconButton>
-              <AccountCircle fontSize="large" />
+              <HowToRegSharpIcon fontSize="large" />
             </IconButton>
             Register
           </Typography>
@@ -158,7 +159,7 @@ export default function Register() {
               name="email"
               value={userState.email}
               onChange={handleInput}
-              label="User Email"
+              label="Email"
               type="email"
               fullWidth
               margin="normal"
@@ -175,7 +176,7 @@ export default function Register() {
               name="password"
               value={userState.password}
               onChange={handleInput}
-              label="User Password"
+              label="Password"
               type="password"
               fullWidth
               margin="normal"
@@ -237,7 +238,7 @@ export default function Register() {
             </Alert>
           )}
           <Typography style={{ marginTop: "20px", textAlign: "center" }}>
-            Already a user? <Link to="/login">Login</Link>
+            Already a User? <Link to="/login">Login</Link>
           </Typography>
         </Paper>
       </Grid>
