@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 import { Box, Typography, TextField, IconButton } from "@mui/material";
 import { Search as SearchIcon, StarBorder as StarBorderIcon } from "@mui/icons-material";
 
-const MessageHeader = () => {
+const MessageHeader = (props) => {
   return (
     <Box
       sx={{
@@ -17,14 +18,14 @@ const MessageHeader = () => {
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography variant="h4" component="div" sx={{ display: "flex", alignItems: "center" }}>
-            CHANNEL
+            {props.channelName}
           </Typography>
           <IconButton>
             <StarBorderIcon fontSize="large" />
           </IconButton>
         </Box>
         <Typography variant="subtitle1" sx={{ marginLeft: 1 }}>
-          3 Users
+          {props.uniqueUsers} {props.uniqueUsers > 1 ? "Users" : "User"}
         </Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -33,11 +34,10 @@ const MessageHeader = () => {
           placeholder="Search Messages"
           size="small"
           variant="outlined"
+          onChange = {props.searchTermChange}
           InputProps={{
             endAdornment: (
-              <IconButton>
-                <SearchIcon />
-              </IconButton>
+              <SearchIcon />
             ),
           }}
         />

@@ -39,23 +39,30 @@ const Channels = () => {
     useEffect(() => {
         if (channelsState.length > 0 && !currentChannel) {
             dispatch(setChannel(channelsState[0]));
-            addActiveClassToFirstItem();
         }
+        addActiveClassToFirstItem();
     }, [channelsState, currentChannel, dispatch]);
 
     const addActiveClassToFirstItem = () => {
         if (menuRef.current) {
-            const firstMenuItem = menuRef.current.querySelector('.menu-item');
-            if (firstMenuItem) {
-                firstMenuItem.classList.add('active');
+            const items = menuRef.current.querySelectorAll('.menu-item');
+            items.forEach(item => item.classList.remove('active'));
+
+            const activeChannelId = currentChannel?.id;
+            const targetItem = Array.from(items).find(item => item.dataset.channelId === activeChannelId) || items[0];
+            if (targetItem) {
+                targetItem.classList.add('active');
             }
         }
     };
 
-    const handleMenuItemClick = (event) => {
+    const handleMenuItemClick = (event, channel) => {
         const items = menuRef.current.querySelectorAll('.menu-item');
         items.forEach(item => item.classList.remove('active'));
         event.currentTarget.classList.add('active');
+    
+        // Dispatch action to update the current channel in the Redux store
+        dispatch(setChannel(channel));  
     };
 
     const openModal = () => setModalOpenState(true);
@@ -109,13 +116,13 @@ const Channels = () => {
                     </IconButton>
                     <Typography variant="body1">Channels ({channelsState.length})</Typography>
                 </MenuItem>
-                {/*Displaying Channels */}
+                {/* Displaying Channels */}
                 {channelsState.map((channel) => (
                     <MenuItem
                         key={channel.id}
-                        name = {channel.name}
+                        data-channel-id={channel.id}
                         className="menu-item"
-                        onClick={handleMenuItemClick}
+                        onClick={(event) => handleMenuItemClick(event, channel)}
                     >
                         <Typography variant="body1">{channel.name}</Typography>
                     </MenuItem>
