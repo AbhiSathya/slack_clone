@@ -16,6 +16,7 @@
     "@mui/icons-material": "^5.15.18",
     "@mui/material": "^5.15.18",
     "@reduxjs/toolkit": "^2.2.5",
+    "dotenv": "^16.4.5",
     "firebase": "^10.12.1",
     "javascript-time-ago": "^2.5.10",
     "mime-types": "^2.1.35",
