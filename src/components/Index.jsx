@@ -25,7 +25,7 @@ export default function Index() {
     });
 
     return () => unsubscribe();
-  }, [dispatch, navigate]);
+  }, []);
 
   console.log("Debug ", currentUser);
   return (

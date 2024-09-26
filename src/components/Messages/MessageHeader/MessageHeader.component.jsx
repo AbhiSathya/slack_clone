@@ -1,6 +1,9 @@
 /* eslint-disable react/prop-types */
 import { Box, Typography, TextField, IconButton } from "@mui/material";
-import { Search as SearchIcon, StarBorder as StarBorderIcon } from "@mui/icons-material";
+import {
+  Search as SearchIcon,
+  StarBorder as StarBorderIcon,
+} from "@mui/icons-material";
 
 const MessageHeader = (props) => {
   return (
@@ -15,17 +18,33 @@ const MessageHeader = (props) => {
         margin: 2,
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography variant="h4" component="div" sx={{ display: "flex", alignItems: "center" }}>
-            {props.channelName}
+          <Typography
+            variant="h4"
+            component="div"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            {(props.isPrivateChat ? "@ " : "# ") + props.channelName}
           </Typography>
-          <IconButton>
-            <StarBorderIcon fontSize="large" />
-          </IconButton>
+          {!props.isPrivateChat && (
+            <IconButton>
+              <StarBorderIcon fontSize="large" />
+            </IconButton>
+          )}
         </Box>
         <Typography variant="subtitle1" sx={{ marginLeft: 1 }}>
-          {props.uniqueUsers} {props.uniqueUsers > 1 ? "Users" : "User"}
+          {props.isPrivateChat
+            ? "Private Chat"
+            : `${props.uniqueUsers} ${
+                props.uniqueUsers > 1 ? "Users" : "User"
+              }`}
         </Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -34,11 +53,9 @@ const MessageHeader = (props) => {
           placeholder="Search Messages"
           size="small"
           variant="outlined"
-          onChange = {props.searchTermChange}
+          onChange={props.searchTermChange}
           InputProps={{
-            endAdornment: (
-              <SearchIcon />
-            ),
+            endAdornment: <SearchIcon />,
           }}
         />
       </Box>

@@ -19,6 +19,7 @@ export const setChannel = (channel) => {
     id: channel.id,
     name: channel.name,
     description: channel.description,
+    isPrivateChat: channel.isPrivateChat,
     created_by : {
       name : channel.displayName,
       avatar : channel.photoURL

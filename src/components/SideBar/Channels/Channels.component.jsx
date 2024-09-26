@@ -40,10 +40,7 @@ const Channels = () => {
         if (channelsState.length > 0 && !currentChannel) {
             dispatch(setChannel(channelsState[0]));
         }
-        addActiveClassToFirstItem();
-    }, [channelsState, currentChannel, dispatch]);
-
-    const addActiveClassToFirstItem = () => {
+        // Update the active state of menu items
         if (menuRef.current) {
             const items = menuRef.current.querySelectorAll('.menu-item');
             items.forEach(item => item.classList.remove('active'));
@@ -54,15 +51,10 @@ const Channels = () => {
                 targetItem.classList.add('active');
             }
         }
-    };
+    }, [channelsState, currentChannel, dispatch]);
 
     const handleMenuItemClick = (event, channel) => {
-        const items = menuRef.current.querySelectorAll('.menu-item');
-        items.forEach(item => item.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    
-        // Dispatch action to update the current channel in the Redux store
-        dispatch(setChannel(channel));  
+        dispatch(setChannel(channel));
     };
 
     const openModal = () => setModalOpenState(true);
@@ -81,6 +73,7 @@ const Channels = () => {
             id: key,
             name: channelAddState.name,
             description: channelAddState.description,
+            isPrivateChat : false,
             created_by: {
                 name: user.displayName,
                 avatar: user.photoURL
@@ -90,7 +83,6 @@ const Channels = () => {
         try {
             await set(ref(realTimeDb, `channels/${key}`), newChannel);
             setChannelAddState({ name: '', description: '' });
-            console.log("saved channel");
             closeModal();
         } catch (error) {
             console.error(error);
@@ -121,13 +113,12 @@ const Channels = () => {
                     <MenuItem
                         key={channel.id}
                         data-channel-id={channel.id}
-                        className="menu-item"
+                        className={`menu-item ${currentChannel?.id === channel.id ? 'active' : ''}`}
                         onClick={(event) => handleMenuItemClick(event, channel)}
                     >
-                        <Typography variant="body1">{channel.name}</Typography>
+                        <Typography variant="body1">{"#" + channel.name}</Typography>
                     </MenuItem>
                 ))}
-
                 <MenuItem onClick={openModal}>
                     <IconButton style={{ color: 'white' }}>
                         <AddIcon />

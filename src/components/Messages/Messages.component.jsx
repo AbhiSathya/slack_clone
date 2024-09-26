@@ -10,6 +10,8 @@ import { Typography, Box } from "@mui/material";
 const Messages = () => {
   const user = useSelector((state) => state.user.currentUser);
   const channel = useSelector((state) => state.channel.currentChannel);
+  // console.log("Channel : ",  channel);
+  // console.log("User : " ,user);
   const [messageState, setMessageState] = useState([]);
   const [searchTermState, setSearchTermState] = useState("");
   const lastMessageRef = useRef(null); // Reference to track the last message
@@ -104,7 +106,7 @@ const Messages = () => {
 
     return messages;
   };
-
+  
   return (
     <Box
       sx={{
@@ -118,6 +120,7 @@ const Messages = () => {
         channelName={channel?.name}
         uniqueUsers={cntUniqueUsers()}
         searchTermChange={searchTermChange}
+        isPrivateChat = {channel.isPrivateChat}
       />
       <Box
         sx={{

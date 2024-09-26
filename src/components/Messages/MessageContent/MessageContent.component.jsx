@@ -48,7 +48,7 @@ const MessageContent = React.forwardRef((props, ref) => {
             <Box sx={{ mt: 1, display: "flex", justifyContent: "left" }}>
               <img
                 src={message.image}
-                alt="Message content"
+                alt="Image Not Found"
                 style={{
                   maxWidth: "100%", // Adjust width as needed
                   maxHeight: "500px", // Adjust height as needed

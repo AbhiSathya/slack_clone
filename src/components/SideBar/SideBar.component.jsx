@@ -1,6 +1,7 @@
 import { Drawer, List } from '@mui/material';
 import UserInfoComponent from './UserInfo/UserInfo.component';
 import Channels from './Channels/Channels.component';
+import PrivateChat from './PrivateChat/PrivateChat.component';
 const SideBar = () => {
     return (
         <Drawer
@@ -19,6 +20,7 @@ const SideBar = () => {
             <List>
                 <UserInfoComponent />
                 <Channels />
+                <PrivateChat />
             </List>
         </Drawer>
     );
