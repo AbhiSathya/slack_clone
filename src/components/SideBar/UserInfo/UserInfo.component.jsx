@@ -46,7 +46,7 @@ const UserInfo = () => {
                 alt="Slack Icon"
                 style={{ width: "30px", height: "30px", objectFit: "cover", marginRight: "10px" }}
               />
-              <span style={{ fontWeight: "bold", fontSize: "1.75rem" }}>Slack Clone</span>
+              <span style={{ fontWeight: "bold", fontSize: "1.75rem" }}>Meet Space</span>
             </Box>
           </Typography>
         </Grid>

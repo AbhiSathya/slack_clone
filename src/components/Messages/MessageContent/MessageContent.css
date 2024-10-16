@@ -1,4 +1,5 @@
-.ownMessage{
-    border-left : 2px solid orange;
-    padding-left: 6px;
+    .ownMessage {
+    border-left: 2px solid orange; /* Left border for the current user's messages */
+    padding-left: 6px; /* Padding to separate the text from the border */
+    background-color: #f9f9f9; /* Optional: Light background for better visibility */
 }

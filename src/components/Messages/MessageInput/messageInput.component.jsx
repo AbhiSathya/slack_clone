@@ -6,8 +6,8 @@ import { realTimeDb } from "../../../server/firebase";
 import { ref as dbRef, push, set, serverTimestamp } from "firebase/database";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useSelector } from "react-redux";
-import { ImageUpload } from "../ImageUpload/ImageUpload.component";
-// import { mime } from "mime-types";
+import FileUpload from "../FileUpload/FileUpload.component"; // Use the updated FileUpload component
+import Picker from '@emoji-mart/react';
 
 const storage = getStorage();
 
@@ -15,6 +15,7 @@ const MessageInput = () => {
   const [messageState, setMessageState] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [fileDialogState, setFileDialogState] = useState(false);
+  const [emojiPickerVisible, setEmojiPickerVisible] = useState(false);
 
   const user = useSelector((state) => state.user.currentUser);
   const channel = useSelector((state) => state.channel.currentChannel);
@@ -24,18 +25,16 @@ const MessageInput = () => {
     return null;
   }
 
-  const createMessageInfo = () => {
-    return {
-      id: uuidv4(),
-      user: {
-        avatar: user.photoURL,
-        name: user.displayName,
-        id: user.uid,
-      },
-      content: messageState,
-      timestamp: serverTimestamp(),
-    };
-  };
+  const createMessageInfo = () => ({
+    id: uuidv4(),
+    user: {
+      avatar: user.photoURL,
+      name: user.displayName,
+      id: user.uid,
+    },
+    content: messageState,
+    timestamp: serverTimestamp(),
+  });
 
   const sendMessage = async () => {
     if (messageState.trim() && !isSending) {
@@ -48,6 +47,7 @@ const MessageInput = () => {
         await set(newMessageRef, createMessageInfo());
         console.log("Message sent");
         setMessageState("");
+        setEmojiPickerVisible(false);
       } catch (error) {
         console.error("Error sending message: ", error);
       } finally {
@@ -60,85 +60,97 @@ const MessageInput = () => {
     setMessageState(event.target.value);
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const handleEmojiSelect = (emoji) => {
+    setMessageState((prev) => prev + emoji.native);
+  };
+
+  const toggleEmojiPicker = () => {
+    setEmojiPickerVisible((prev) => !prev);
+  }
+
   const createActionBtns = () => (
     <>
-      <IconButton onClick={() => sendMessage()} disabled={isSending}>
+      <IconButton onClick={sendMessage} disabled={isSending}>
         <SendIcon />
       </IconButton>
-      <IconButton onClick={() => setFileDialogState(true)} >
+      <IconButton onClick={() => setFileDialogState(true)}>
         <UploadIcon />
+      </IconButton>
+      <IconButton onClick={toggleEmojiPicker}>
+        <span role="img" aria-label="emoji">😊</span>
       </IconButton>
     </>
   );
 
-  const uploadImage = (file, contentType) => {
-    const filePath = `chat/images/${uuidv4()}.jpg`;
+  const uploadFile = (file, contentType) => {
+    const filePath = `chat/files/${uuidv4()}_${file.name}`;
     const storageReference = storageRef(storage, filePath);
 
-    const uploadTask = uploadBytes(storageReference, file, { contentType: contentType });
-    uploadTask
-      .then((snapshot) => {
-        return getDownloadURL(snapshot.ref);
-      })
+    uploadBytes(storageReference, file, { contentType })
+      .then((snapshot) => getDownloadURL(snapshot.ref))
       .then((url) => {
-        // Create a message with the image URL and send it
-        const imageMessage = {
+        const fileMessage = {
           ...createMessageInfo(),
-          content: "", // You can also set some content if needed
-          image: url,  // Add the image URL
+          content: "", // Optional content
+          file: { url, name: file.name },  // File details
         };
         const messageRef = dbRef(realTimeDb, `messages/${channel.id}`);
         const newMessageRef = push(messageRef);
-
-        return set(newMessageRef, imageMessage);
+        
+        return set(newMessageRef, fileMessage);
       })
-      .then(() => console.log("Image message sent"))
-    //   .then((data) => console.log(data))
-      .catch((err) => console.log(err));
+      .then(() => console.log("File message sent"))
+      .catch((err) => console.error("Error uploading file:", err));
   };
 
-
   return (
-    <>
-      {/* Other content of the page goes here */}
-
-      {/* The message input box */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          padding: 2,
-          position: "fixed", // Fixed positioning
-          bottom: 0, // Sticks to the bottom of the screen
-          left: 280,
-          right: 0,
-          backgroundColor: "white", // Background color to ensure visibility
-          zIndex: 1000, // Ensure it's above other content
-          boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)", // Optional shadow for better visual
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        flexDirection: "column",
+        padding: 2,
+        bottom: 0,
+        left: 280,
+        right: 0,
+        backgroundColor: "white",
+        zIndex: 1000,
+        boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <TextField
+        name="message"
+        value={messageState}
+        placeholder="Type your message here..."
+        variant="outlined"
+        onChange={onMessageChange}
+        onKeyDown={handleKeyPress}
+        fullWidth
+        slotProps={{
+          input: {
+            endAdornment: <InputAdornment position="end">{createActionBtns()}</InputAdornment>,
+          }
         }}
-      >
-        <TextField
-          name="message"
-          value={messageState}
-          placeholder="Type your message here..."
-          variant="outlined"
-          onChange={onMessageChange}
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                {createActionBtns()}
-              </InputAdornment>
-            ),
-          }}
+      />
+      {emojiPickerVisible && (
+        <Picker
+          onEmojiSelect={handleEmojiSelect} // Updated for emoji-mart v5
+          style={{ position: "absolute", bottom: "90px", left: "280px", zIndex: 2000 }}
         />
-        <ImageUpload
-          uploadImage={uploadImage}
-          open={fileDialogState}
-          onClose={() => setFileDialogState(false)}
-        />
-      </Box>
-    </>
+      )}
+      <FileUpload
+        uploadFile={uploadFile} // Updated to call uploadFile function
+        open={fileDialogState}
+        onClose={() => setFileDialogState(false)}
+      />
+    </Box>
   );
 };
 

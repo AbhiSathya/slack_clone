@@ -2,6 +2,7 @@ import { Drawer, List } from '@mui/material';
 import UserInfoComponent from './UserInfo/UserInfo.component';
 import Channels from './Channels/Channels.component';
 import PrivateChat from './PrivateChat/PrivateChat.component';
+
 const SideBar = () => {
     return (
         <Drawer
@@ -14,7 +15,7 @@ const SideBar = () => {
                     overflowY: 'scroll',
                 },
             }}
-            variant="permanent"
+            variant="permanent" // Keep it permanent for now; we control visibility with isSidebarOpen in App
             anchor="left"
         >
             <List>

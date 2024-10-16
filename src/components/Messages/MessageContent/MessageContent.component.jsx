@@ -1,10 +1,11 @@
-/* eslint-disable react/prop-types */
 import React from "react";
-import { Avatar, Typography, Box, Card, CardContent } from "@mui/material";
+import { Avatar, Typography, Box, Card, CardContent, Button } from "@mui/material";
+import { Download as DownloadIcon, InsertDriveFile as FileIcon } from "@mui/icons-material";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import enIN from "javascript-time-ago/locale/en-IN";
-
+import MediaContent from "./MediaContent";
+import { isAudioFile, isImageFile, isVideoFile } from "./FileHandler";
 import "./MessageContent.css";
 
 // Configure TimeAgo
@@ -16,24 +17,14 @@ const timeAgo = new TimeAgo("en-IN");
 const MessageContent = React.forwardRef((props, ref) => {
   const { message, ownMessage, imageLoaded } = props;
 
-  // Ensure timestamp is valid
-  const formattedTime = message.timestamp
-    ? timeAgo.format(new Date(message.timestamp))
-    : "";
+  // Format the timestamp
+  const formattedTime = message.timestamp ? timeAgo.format(new Date(message.timestamp)) : "";
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "flex-start",
-        mb: 0.5,
-        backgroundColor: "#FFFF",
-      }}
-      ref={ref} // Attach ref here if needed
-    >
+    <Box sx={{ display: "flex", alignItems: "flex-start", mb: 0.5, backgroundColor: "#FFFF" }} ref={ref}>
       <Avatar src={message.user.avatar} sx={{ mr: 1 }} />
       <Card sx={{ width: "700px" }}>
-        <CardContent className={ownMessage ? "ownMessage" : null}>
+        <CardContent className={ownMessage ? "ownMessage" : ""}>
           <Typography variant="subtitle1" gutterBottom>
             {message.user.name}
           </Typography>
@@ -44,19 +35,26 @@ const MessageContent = React.forwardRef((props, ref) => {
             {message.content}
           </Typography>
 
-          {message.image && (
-            <Box sx={{ mt: 1, display: "flex", justifyContent: "left" }}>
-              <img
-                src={message.image}
-                alt="Image Not Found"
-                style={{
-                  maxWidth: "100%", // Adjust width as needed
-                  maxHeight: "500px", // Adjust height as needed
-                  objectFit:"cover", // Maintain aspect ratio
-                  borderRadius: 4,
-                }}
-                onLoad={imageLoaded}
-              />
+          {/* Use the MediaContent component to handle image, audio, and video rendering */}
+          <MediaContent message={message} imageLoaded={imageLoaded} />
+
+          {/* Display file name and download button for non-media files */}
+          {message.file && !isImageFile(message.file) && (
+            <Box sx={{ mt: 1, display: "flex", alignItems: "center" }}>
+              <FileIcon sx={{ marginRight: 1 }} />
+              <Typography variant="body2" sx={{ mr: 1 }}>
+                {message.file.name}
+              </Typography>
+              {(!isAudioFile(message.file) && !isVideoFile(message.file)) && <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                startIcon={<DownloadIcon />}
+                onClick={() => window.open(message.file.url, "_blank")}
+                aria-label={`Download ${message.file.name}`}
+              >
+                Download
+              </Button>}
             </Box>
           )}
         </CardContent>
@@ -65,6 +63,6 @@ const MessageContent = React.forwardRef((props, ref) => {
   );
 });
 
-MessageContent.displayName = "MessageContent"; // Helpful for debugging
+MessageContent.displayName = "MessageContent";
 
 export default MessageContent;

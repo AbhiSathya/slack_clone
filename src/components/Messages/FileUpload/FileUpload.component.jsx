@@ -1,12 +1,13 @@
-/* eslint-disable react/prop-types */
 import { useState } from 'react';
 import { Box, Input, Modal, Button, Typography } from '@mui/material';
 import { Check as CheckIcon, Close as CloseIcon } from '@mui/icons-material';
+import acceptedTypes from './FileExtensions';
 
-export const ImageUpload = (props) => {
+const FileUpload = (props) => {
   const [fileState, setFileState] = useState(null);
 
-  const acceptedTypes = ['image/png', 'image/jpeg'];
+  // Accept various file types including images, PDFs, and documents
+  // const acceptedTypes = ['image/png', 'image/jpeg', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
   const onFileAdded = (e) => {
     const file = e.target.files[0];
@@ -17,7 +18,7 @@ export const ImageUpload = (props) => {
 
   const submit = () => {
     if (fileState && acceptedTypes.includes(fileState.type)) {
-      props.uploadImage(fileState, fileState.type);
+      props.uploadFile(fileState, fileState.type);
       props.onClose();
       setFileState(null);
     } else {
@@ -41,16 +42,16 @@ export const ImageUpload = (props) => {
         }}
       >
         <Typography variant="h6" component="h2">
-          Select an image
+          Select a file
         </Typography>
-        <p>File Type(png, Jpeg)</p>
+        <p>Accepted File Types: PNG, JPEG, PDF, DOC, DOCX</p>
         <Input
           type="file"
           name="file"
           onChange={onFileAdded}
           fullWidth
           sx={{ mt: 2, mb: 2 }}
-          inputProps={{ accept: '.png, .jpeg' }}
+          inputProps={{ accept: acceptedTypes.join(',') }}
         />
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
@@ -75,3 +76,4 @@ export const ImageUpload = (props) => {
     </Modal>
   );
 };
+export default FileUpload;
