@@ -1,0 +1,24 @@
+.color {
+    color: white;
+}
+.menu-item {
+    /* Default styles for MenuItem */
+    background-color: white; /* Default background color */
+    color: black; /* Default text color */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+.menu-item:hover {
+    background-color: #f0f0f0; /* Hover background color for non-active items */
+}
+
+.menu-item.active {
+    background-color: #1164A3; /* Active background color */
+    color: white; /* Active text color */
+}
+
+.menu-item.active:hover {
+    background-color: #1164A3; /* Ensure hover state for active item is same as active background color */
+    color: white; /* Ensure hover state for active item is same as active text color */
+}

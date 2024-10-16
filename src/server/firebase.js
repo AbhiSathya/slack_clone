@@ -2,21 +2,23 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
-
+// require("dotenv");
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDWAbAscdDyyJwQ12AzhcREpnp-IRrmfk8",
-  authDomain: "slack-react-clone-66f95.firebaseapp.com",
-  databaseURL: "https://slack-react-clone-66f95-default-rtdb.firebaseio.com",
-  projectId: "slack-react-clone-66f95",
-  storageBucket: "slack-react-clone-66f95.appspot.com",
-  messagingSenderId: "193349450901",
-  appId: "1:193349450901:web:d3e0b8dc19b2c90523af9c",
-  measurementId: "G-PTTB3J9V9G"
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_DATABASE_URL,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID
 };
+// console.log(firebaseConfig);
+// console.log(import.meta.env.VITE_API_KEY); // Log the API Key
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
