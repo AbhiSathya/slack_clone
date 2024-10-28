@@ -13,7 +13,6 @@ import { auth } from "../../../server/firebase";
 
 import "./UserInfo.css";
 import { ArrowDropDown } from "@mui/icons-material";
-
 const UserInfo = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useSelector((state) => state.user.currentUser);
@@ -37,12 +36,12 @@ const UserInfo = () => {
 
   if (user) {
     return (
-      <Grid container direction="column" className="userinfo_grid_row">
+      <Grid container direction="column" className="userinfo_grid_row" position={"relative"} left={"-10px"}>
         <Grid item>
         <Typography variant="h3" component="div" color="white" gutterBottom>
-            <Box display="flex" alignItems="center">
+            <Box display="flex" alignItems="center" >
               <img
-                src="src/assets/mdi--slack.png"
+                src="src/assets/icon.svg"
                 alt="Slack Icon"
                 style={{ width: "30px", height: "30px", objectFit: "cover", marginRight: "10px" }}
               />
@@ -52,15 +51,19 @@ const UserInfo = () => {
         </Grid>
         <Grid item>
           <Typography
-            variant="h4"
+            variant="h3"
             component="div"
             className="userinfo_displayname"
           >
             <IconButton onClick={handleMenuOpen}>
-              <Box display="flex" alignItems="center" color="white">
+              <Box display="flex" alignItems="center" color="white" gap={1}>
+                <Box marginLeft={-2} >
                 <Avatar src={user.photoURL} />
-                <Box ml={2}>{user.displayName}</Box>
+                </Box>
+                <Box display={"flex"} flexDirection={"row"}>
+                <Box ml={0}>{user.displayName}</Box>
                 <ArrowDropDown />
+                </Box>
               </Box>
             </IconButton>
             <Menu

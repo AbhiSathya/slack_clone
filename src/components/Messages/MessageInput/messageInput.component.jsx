@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Box, TextField, IconButton, InputAdornment } from "@mui/material";
+import { Box, TextField, IconButton, InputAdornment, Stack } from "@mui/material";
 import { Send as SendIcon, Upload as UploadIcon } from "@mui/icons-material";
 import { realTimeDb } from "../../../server/firebase";
 import { ref as dbRef, push, set, serverTimestamp } from "firebase/database";
@@ -111,46 +111,50 @@ const MessageInput = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        flexDirection: "column",
-        padding: 2,
-        bottom: 0,
-        left: 280,
-        right: 0,
-        backgroundColor: "white",
-        zIndex: 1000,
-        boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <TextField
-        name="message"
-        value={messageState}
-        placeholder="Type your message here..."
-        variant="outlined"
-        onChange={onMessageChange}
-        onKeyDown={handleKeyPress}
-        fullWidth
-        slotProps={{
-          input: {
-            endAdornment: <InputAdornment position="end">{createActionBtns()}</InputAdornment>,
-          }
+    <Stack sx={{ position: "relative" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexDirection: "column",
+          padding: 2,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          zIndex: 1000,
+          boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)",
+          position: "relative",
         }}
-      />
-      {emojiPickerVisible && (
-        <Picker
-          onEmojiSelect={handleEmojiSelect} // Updated for emoji-mart v5
-          style={{ position: "absolute", bottom: "90px", left: "280px", zIndex: 2000 }}
+      >
+        <TextField
+          name="message"
+          value={messageState}
+          placeholder="Type your message here..."
+          variant="outlined"
+          onChange={onMessageChange}
+          onKeyDown={handleKeyPress}
+          fullWidth
+          slotProps={{
+            input: {
+              endAdornment: <InputAdornment position="end">{createActionBtns()}</InputAdornment>,
+            }
+          }}
         />
+        
+        <FileUpload
+          uploadFile={uploadFile} // Updated to call uploadFile function
+          open={fileDialogState}
+          onClose={() => setFileDialogState(false)}
+        />
+      </Box>
+
+      {emojiPickerVisible && (
+        <Box sx={{ position: "absolute", bottom: "90px", right: "40px", zIndex: 1001 }}>
+          <Picker onEmojiSelect={handleEmojiSelect} />
+        </Box>
       )}
-      <FileUpload
-        uploadFile={uploadFile} // Updated to call uploadFile function
-        open={fileDialogState}
-        onClose={() => setFileDialogState(false)}
-      />
-    </Box>
+    </Stack>
   );
 };
 
