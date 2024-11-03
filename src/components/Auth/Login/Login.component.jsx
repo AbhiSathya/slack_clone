@@ -13,7 +13,7 @@ import { MailOutline, Lock } from "@mui/icons-material";
 import LoginIcon from '@mui/icons-material/Login';
 import { auth } from "../../../server/firebase.js";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const initialUser = {
@@ -22,6 +22,7 @@ export default function Login() {
   };
 
   let errors = [];
+  const navigate = useNavigate(); // Move useNavigate outside onSubmit
 
   const [userState, setUserState] = useState(initialUser);
   const [errorState, setErrorState] = useState(errors);
@@ -37,9 +38,7 @@ export default function Login() {
 
   const checkForm = () => {
     if (isFormEmpty()) {
-      setErrorState((error) =>
-        error.concat({ message: "Please fill in all the fields" })
-      );
+      setErrorState([{ message: "Please fill in all the fields" }]);
       return false;
     }
     return true;
@@ -54,7 +53,7 @@ export default function Login() {
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    setErrorState(() => []);
+    setErrorState([]); // Clear previous errors
     if (checkForm()) {
       setIsLoading(true);
       try {
@@ -65,9 +64,10 @@ export default function Login() {
         );
         console.log(user);
         setIsLoading(false);
+        navigate('/'); // Redirect after successful login
       } catch (serverError) {
         setIsLoading(false);
-        setErrorState((e) => e.concat(serverError));
+        setErrorState([{ message: serverError.message }]);
       }
     }
   };

@@ -3,6 +3,7 @@ import App from "../App";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Login from "./Auth/Login/Login.component";
 import Register from "./Auth/Register/Register.component";
+import HomePage from "../homepage";
 import { auth } from "../server/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, setLoading } from "../store/actioncreater";
@@ -12,7 +13,7 @@ import { set } from "firebase/database";
 export default function Index() {
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.user.currentUser);
-  const loading = useSelector((state) => state.channel.loading); 
+  const loading = useSelector((state) => state.channel.loading);
   const navigate = useNavigate();
   const location = useLocation(); // To get the current path
 
@@ -21,7 +22,7 @@ export default function Index() {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       dispatch(setUser(currentUser));
       dispatch(setLoading(false)); // Set loading to false after auth check
-      navigate(currentUser ? '/' : '/login');
+      navigate(currentUser ? '/' : '/homepage');
 
     });
 
@@ -43,7 +44,9 @@ export default function Index() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<App />} />
+        <Route path="/homepage" element={<HomePage />} />
       </Routes>
+
     </>
   );
 }

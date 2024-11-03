@@ -22,12 +22,12 @@ const store = configureStore({
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ErrorBoundary>
+    {/* <ErrorBoundary> */}
       <Provider store={store}>
         <Router>
           <Index />
         </Router>
       </Provider> 
-    </ErrorBoundary>
+    {/* </ErrorBoundary> */}
   </React.StrictMode>
 );
