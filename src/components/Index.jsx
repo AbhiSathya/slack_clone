@@ -3,7 +3,7 @@ import App from "../App";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Login from "./Auth/Login/Login.component";
 import Register from "./Auth/Register/Register.component";
-import HomePage from "../homepage";
+import HomePage from "./../homepage";
 import { auth } from "../server/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, setLoading } from "../store/actioncreater";
